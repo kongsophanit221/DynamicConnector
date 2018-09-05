@@ -58,7 +58,7 @@ class FetchExpression(
             return FetchExpression(entity, aggregate = true)
         }
 
-        fun fetct(count: Int? = null, entityType: String, page: Int? = null, pagingCookie: String? = null, attributes: ArrayList<String>? = null,
+        fun fetch(count: Int? = null, entityType: String, page: Int? = null, pagingCookie: String? = null, attributes: ArrayList<String>? = null,
                   filter: Filter? = null, orderAttribute: String? = null, isDescending: Boolean = false): FetchExpression {
             val _attributes = attributes?.let { ArrayList(it!!.map { Attributee(it) }) }
             val _order = orderAttribute?.let { arrayListOf(Order(it, null, isDescending)) }

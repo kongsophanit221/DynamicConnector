@@ -7,6 +7,7 @@ import org.simpleframework.xml.convert.Convert
 import org.simpleframework.xml.convert.Converter
 import org.simpleframework.xml.core.Persister
 import org.simpleframework.xml.stream.InputNode
+import org.simpleframework.xml.stream.Node
 import org.simpleframework.xml.stream.OutputNode
 import soteca.com.genisysandroid.framwork.helper.crmFormatToDate
 import soteca.com.genisysandroid.framwork.helper.crmFormatToString
@@ -84,11 +85,18 @@ data class EntityCollection(
             if (vt.size == 0) {
                 return null
             }
-            return vt.single().value
+            return vt.first().value
         }
 
         operator fun set(key: String, value: ValueType?) {
-            keyValuePairList!!.add(KeyValuePairOfstringanyType(key, Value(value)))
+            val vt = keyValuePairList!!.filter {
+                it.key == key
+            }
+            if (!vt.isEmpty()) {
+                vt.first().valueType = Value(value)
+            } else {
+                keyValuePairList!!.add(KeyValuePairOfstringanyType(key, Value(value)))
+            }
         }
 
         fun of(vararg pairs: Pair<String, ValueType>): Attribute {
@@ -109,7 +117,7 @@ data class EntityCollection(
 
             @field:Element(name = "value", required = false)
             @field:Namespace(reference = "http://schemas.datacontract.org/2004/07/System.Collections.Generic", prefix = "c")
-            private var valueType: Value? = null) {
+            var valueType: Value? = null) {
 
         val value: ValueType?
             get() = valueType!!.value
@@ -135,9 +143,9 @@ data class EntityCollection(
         class decimal(val value: Double) : ValueType()
         class long(val value: Long) : ValueType()
         class double(val value: Double) : ValueType()
-        class money(val value: Double) : ValueType()
+        class money(val value: Double, var isMultiExe: Boolean = false) : ValueType()
         class data(val value: String) : ValueType()
-        class entityReference(val value: EntityReference) : ValueType()
+        class entityReference(val value: EntityReference, var isMultiExe: Boolean = false) : ValueType()
         class entityCollection(val value: EntityCollection) : ValueType()
         class aliasedValue(val value: AliasedType) : ValueType()
 
@@ -158,6 +166,7 @@ data class EntityCollection(
                     is entityReference -> return value
                     is entityCollection -> return value
                     is aliasedValue -> return value
+//                    is moneyMultiExe -> return value
                 }
             }
     }
@@ -178,6 +187,7 @@ data class EntityCollection(
         ENTITY_COLLECTION("b:EntityCollection"),
         ALIASED_VALUE("b:AliasedValue"),
         DATA("base64Binary");
+//        MONEY_MULTI_EXE("a:Money");
 
         companion object {
             fun from(findValue: String): Type = Type.values().first { it.value == findValue }
@@ -220,6 +230,7 @@ data class EntityCollection(
                     is EntityCollection.ValueType.string -> {
                         node!!.namespaces.setReference("http://www.w3.org/2001/XMLSchema", "d")
                         node.setAttribute("i:type", Type.STRING.value)
+                        val aa = (it.value as ValueType.string).value
                         node.value = (it.value as ValueType.string).value
 
                     }
@@ -249,16 +260,32 @@ data class EntityCollection(
                     }
 
                     is EntityCollection.ValueType.money -> {
-                        node!!.setAttribute("i:type", Type.MONEY.value)
-                        val nodeContainer = node.getChild("Value")
-                        nodeContainer.namespaces.setReference("http://schemas.microsoft.com/xrm/2011/Contracts")
-                        nodeContainer.value = (it.value as ValueType.money).value.toString()
+                        val money = it.value as ValueType.money
+                        var nodeContainer: Node?
+
+                        if (money.isMultiExe) {
+                            node!!.setAttribute("i:type", "a:Money")
+                            nodeContainer = node!!.getChild("Value")
+                            nodeContainer.reference = "http://schemas.microsoft.com/xrm/2011/Contracts"
+                        } else {
+                            node!!.setAttribute("i:type", Type.MONEY.value)
+                            nodeContainer = node!!.getChild("Value")
+                            nodeContainer.reference = "http://schemas.microsoft.com/xrm/2011/Contracts"
+                        }
+
+                        nodeContainer.value = money.value.toString()
                     }
 
                     is EntityCollection.ValueType.entityReference -> {
-                        node!!.setAttribute("i:type", Type.ENTITY_REFERENCE.value)
+                        val entityReferenceValueType = it.value as ValueType.entityReference
 
-                        val entityReference = (it.value as ValueType.entityReference).value
+                        if (entityReferenceValueType.isMultiExe) {
+                            node!!.setAttribute("i:type", "a:EntityReference")
+                        } else {
+                            node!!.setAttribute("i:type", Type.ENTITY_REFERENCE.value)
+                        }
+
+                        val entityReference = entityReferenceValueType.value
                         val nodeId = node.getChild("Id")
                         nodeId.reference = "http://schemas.microsoft.com/xrm/2011/Contracts"
                         nodeId.value = entityReference.id
@@ -272,7 +299,6 @@ data class EntityCollection(
                             nodeName.reference = "http://schemas.microsoft.com/xrm/2011/Contracts"
                             nodeName.value = it
                         }
-
                     }
 
                     is EntityCollection.ValueType.aliasedValue -> TODO()

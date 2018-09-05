@@ -47,8 +47,8 @@ class RequestTask<T : Decoder>(val decoder: Decoder?, val done: ((result: T?, er
             if (connection!!.responseCode != HttpURLConnection.HTTP_OK && connection!!.responseCode != HttpURLConnection.HTTP_CREATED) {
                 inputStream = connection!!.errorStream
                 isErrorResponse = true
-                val errorText = streamToString(inputStream)!!
-                Log.d(TAG, errorText)
+//                val errorText = streamToString(inputStream)!!
+//                Log.d(TAG, errorText)
             } else {
                 inputStream = connection!!.inputStream
                 isErrorResponse = false

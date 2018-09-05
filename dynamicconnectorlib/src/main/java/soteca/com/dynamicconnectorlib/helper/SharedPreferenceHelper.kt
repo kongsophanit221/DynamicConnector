@@ -141,6 +141,6 @@ class SharedPreferenceHelper(ctx: Context) {
     }
 
     fun deleteValue(key: String) {
-        prefs!!.edit().remove(USER_INFORMATION).apply()
+        prefs!!.edit().remove(key).apply()
     }
 }

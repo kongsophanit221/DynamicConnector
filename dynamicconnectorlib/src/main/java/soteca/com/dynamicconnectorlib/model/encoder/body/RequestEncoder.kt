@@ -281,7 +281,6 @@ class ParamConverter : Converter<Parameters> {
             else -> { // Execute multi Create, Update, Delete Request
                 node!!.namespaces.setReference("http://schemas.datacontract.org/2004/07/System.Collections.Generic", "b")
 
-//                if (value!!.requestName)
 
                 if (value!!.keyValues != null) {
                     value!!.keyValues!!.forEach {

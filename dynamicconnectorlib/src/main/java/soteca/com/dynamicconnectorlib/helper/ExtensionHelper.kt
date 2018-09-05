@@ -14,7 +14,7 @@ class ExtensionHelper {
  */
 
 fun Date.crmFormatToString(): String {
-    var simpleDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+    var simpleDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
     simpleDateFormat.timeZone = TimeZone.getTimeZone("GMT")
 
     return simpleDateFormat.format(this)
@@ -25,10 +25,13 @@ fun Date.crmFormatToString(): String {
  **/
 
 fun String.crmFormatToDate(): Date {
-    var simpleDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+    var simpleDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.getDefault())
 
     if (this.length > 20)
-        simpleDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        simpleDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+
+    if (this.length == 19)
+        simpleDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
 
     simpleDateFormat.timeZone = TimeZone.getTimeZone("GMT")
 
