@@ -4,7 +4,7 @@ import org.simpleframework.xml.*
 
 @Root(name = "fetch")
 @Order(attributes = ["top", "count", "page", "mapping", "version"])
-class FetchExpression(
+open class FetchExpression(
         @field:Element(name = "entity", required = false)
         var entity: Entity? = null,
 
@@ -38,6 +38,12 @@ class FetchExpression(
 
     companion object {
 
+        var mInstance: FetchExpression? = null
+        fun getInstance(): FetchExpression {
+            mInstance = FetchExpression()
+            return mInstance!!
+        }
+
         fun fetchForms(entityCode: String): FetchExpression {
             val filter = Filter.singleCondition(Condition("objecttypecode", Operator.equal, entityCode))
             val fetchExpression = FetchExpression(Entity("systemform", filter = filter))
@@ -69,7 +75,7 @@ class FetchExpression(
     }
 
     @Root(strict = false)
-    class Entity(name: String, val attributes: ArrayList<Attributee>? = null, linkEntities: ArrayList<LinkEntity>? = null, filter: Filter? = null, orders: ArrayList<Order>? = null) {
+    open class Entity(name: String, val attributes: ArrayList<Attributee>? = null, linkEntities: ArrayList<LinkEntity>? = null, filter: Filter? = null, orders: ArrayList<Order>? = null) {
 
         @field:Attribute(name = "name", required = false)
         private var n: String? = name
@@ -97,7 +103,7 @@ class FetchExpression(
     }
 
     @Root(strict = false)
-    class Attributee(
+    open class Attributee(
             @field:Attribute(name = "name", required = false)
             var name: String? = null,
 
@@ -150,9 +156,9 @@ class FetchExpression(
     }
 
     @Root(strict = false)
-    class LinkEntity(name: String, from: String, to: String, alias: String? = null, linkType: LinkType? = null, visible: Boolean? = false,
-                     intersect: Boolean? = false, val attributes: ArrayList<Attributee>? = null, order: Order? = null, filter: Filter? = null,
-                     linkEntities: ArrayList<LinkEntity>? = null) {
+    open class LinkEntity(name: String, from: String, to: String, alias: String? = null, linkType: LinkType? = null, visible: Boolean? = false,
+                          intersect: Boolean? = false, val attributes: ArrayList<Attributee>? = null, order: Order? = null, filter: Filter? = null,
+                          linkEntities: ArrayList<LinkEntity>? = null) {
 
         @field:Attribute(name = "name", required = false)
         private var _name: String? = name
@@ -220,7 +226,7 @@ class FetchExpression(
     }
 
     @Root(strict = false)
-    class Filter(
+    open class Filter(
             @field:Attribute(name = "type", required = false)
             var type: LogicalOperator = LogicalOperator.and,
 
@@ -256,7 +262,7 @@ class FetchExpression(
     }
 
     @Root(strict = false)
-    class Condition() {
+    open class Condition() {
 
         @field:Attribute(name = "attribute", required = false)
         private var attribute: String? = null
@@ -320,7 +326,7 @@ class FetchExpression(
         }
 
         @Root(name = "value", strict = false)
-        class Value(
+        open class Value(
                 @field:Text
                 var value: String = "",
 
@@ -375,7 +381,7 @@ class FetchExpression(
     }
 
     @Root(strict = false)
-    class Order(
+    open class Order(
             @field:Attribute(name = "attribute", required = false)
             var attribute: String = "",
 
